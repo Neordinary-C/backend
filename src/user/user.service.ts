@@ -2,10 +2,12 @@ import { Injectable } from '@nestjs/common';
 import { UpdateUserDto } from './dto/update-user.dto';
 import { DatabaseService } from 'src/database/database.service';
 import { Prisma } from '@prisma/client';
+import { StartTimerDto } from './dto/user-timer.dto';
+import { UpdateNumberDto } from './dto/update-number.dto';
 
 @Injectable()
 export class UserService {
-  constructor(private readonly databaseService: DatabaseService) {}
+  constructor(private readonly databaseService: DatabaseService) { }
 
   async create(createUserDto: Prisma.UserCreateInput) {
     await this.databaseService.user.create({
@@ -42,31 +44,82 @@ export class UserService {
     };
   }
   async getShortsSeenNumber(userId: string) {
-    const user=await this.databaseService.user.findFirst({where:{
-      user_id: userId
-    }})
-    const userShorts=await this.databaseService.userShorts.findFirst({where:{
+    const user = await this.databaseService.user.findFirst({
+      where: {
+        user_id: userId
+      }
+    })
+    const userShorts = await this.databaseService.userShorts.findFirst({
+      where: {
         user_id: user.id
       }
     })
     return {
       success: "ok",
-      number: userShorts.watched_count?userShorts.watched_count:0
+      number: userShorts.watched_count ? userShorts.watched_count : 0
     };
   }
 
-  async getPlanTimer(userId:string){
-    const user=await this.databaseService.user.findFirst({where:{
-      user_id:userId
-    }})
-    const user_timer=await this.databaseService.userTimer.findFirst({where:{
-      user_id:user.id
-    }
+  async getPlanTimer(userId: string) {
+    const user = await this.databaseService.user.findFirst({
+      where: {
+        user_id: userId
+      }
     })
-    return{
-      success:"ok",
-      time_h:user_timer ? user_timer.timer_h :0,
-      time_m:user_timer ? user_timer.timer_m :0
+    const user_timer = await this.databaseService.userTimer.findFirst({
+      where: {
+        user_id: user.id
+      }
+    })
+    return {
+      success: "ok",
+      time_h: user_timer ? user_timer.timer_h : 0,
+      time_m: user_timer ? user_timer.timer_m : 0
     }
+  }
+  async startTime(startTimeDto: StartTimerDto) {
+    const user = await this.databaseService.user.findFirst({
+      where: {
+        user_id: startTimeDto.user_id
+      }
+    })
+    const user_timer = await this.databaseService.userTimer.findFirst({
+      where: {
+        user_id: user.id
+      }
+    })
+    await this.databaseService.userTimer.create({
+      data: {
+        start_time: user_timer.start_time
+      }
+    });
+
+    return {
+      success: "ok"
+    };
+  }
+
+  async updateSeenNumber(updateNumberDto: UpdateNumberDto) {
+    const user = await this.databaseService.user.findFirst({
+      where: {
+        user_id: updateNumberDto.user_id
+      }
+    })
+    const user_shorts=await this.databaseService.userShorts.findMany({
+      where:{
+        user_id:user.id,
+        
+      }
+    })
+    await this.databaseService.userShorts.updateMany(
+      {
+        where: {
+          user_id: user.id,
+          created_at:user_shorts.pop().created_at
+        },
+        data: {
+          watched_count: updateNumberDto.watched_count
+        }
+      })
   }
 }

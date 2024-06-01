@@ -12,6 +12,9 @@ import { UserService } from './user.service';
 import { UpdateUserDto } from './dto/update-user.dto';
 import { ApiOperation, ApiTags } from '@nestjs/swagger';
 import { Prisma } from '@prisma/client';
+import { StartTimerDto } from './dto/user-timer.dto';
+import { UpdateNumberDto } from './dto/update-number.dto';
+
 
 @ApiTags('users')
 @Controller('users') // localhost:3000/api/users
@@ -48,5 +51,15 @@ export class UserController {
   @Get('/timer')
   getPlanTimer(@Query('userId') user_id:string){
     return this.userService.getPlanTimer(user_id)
+  }
+
+  @Post('/timer')
+  startTime(@Body() startTimeDto: StartTimerDto) {
+   return this.userService.startTime(startTimeDto);
+  }
+
+  @Patch('/shorts/count')
+  updateSeenNumber(@Body() updateNumberDto: UpdateNumberDto) {
+    return this.userService.updateSeenNumber(updateNumberDto);
   }
 }
