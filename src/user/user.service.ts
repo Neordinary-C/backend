@@ -156,6 +156,7 @@ export class UserService {
 
       entries.forEach((entry, index) => {
         let nextPageToken;
+
         for (let i = 0; i < entry; i++) {
           const url = nextPageToken
             ? `https://www.googleapis.com/youtube/v3/videos?part=snippet,contentDetails,statistics&chart=mostPopular&maxResults=${entry}&regionCode=kr&videoCategoryId=${categoryIdList[index]}&videoDefinition=shortDefinition&key=${process.env.YOUTUBE_API_KEY}&pageToken=${nextPageToken}`
@@ -182,9 +183,9 @@ export class UserService {
                   response.data?.items?.map((item) => item?.id),
               );
 
-              if (index - 1 == entry) {
+              setTimeout(() => {
                 resolve(responses?.flat());
-              }
+              }, 10000);
             })
             .catch((e) => {
               console.log(e);
