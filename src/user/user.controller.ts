@@ -1,25 +1,33 @@
-import { Controller, Get, Post, Body, Patch, Param, Delete } from '@nestjs/common';
+import {
+  Controller,
+  Get,
+  Post,
+  Body,
+  Patch,
+  Param,
+  Delete,
+  Query,
+} from '@nestjs/common';
 import { UserService } from './user.service';
-import { CreateUserDto } from './dto/create-user.dto';
 import { UpdateUserDto } from './dto/update-user.dto';
+import { ApiOperation, ApiTags } from '@nestjs/swagger';
+import { Prisma } from '@prisma/client';
 
-@Controller('user')
+@ApiTags('users')
+@Controller('users') // localhost:3000/api/users
 export class UserController {
   constructor(private readonly userService: UserService) {}
 
-  @Post()
-  create(@Body() createUserDto: CreateUserDto) {
+  @ApiOperation({ summary: 'Creates a new user.' })
+  @Post() //POST
+  create(@Body() createUserDto: Prisma.UserCreateInput) {
     return this.userService.create(createUserDto);
   }
 
-  @Get()
+  @ApiOperation({ summary: 'Get a new user.' })
+  @Get() //GET
   findAll() {
     return this.userService.findAll();
-  }
-
-  @Get(':id')
-  findOne(@Param('id') id: string) {
-    return this.userService.findOne(+id);
   }
 
   @Patch(':id')
@@ -30,5 +38,15 @@ export class UserController {
   @Delete(':id')
   remove(@Param('id') id: string) {
     return this.userService.remove(+id);
+  }
+
+  @Get('/shorts')
+  getShortsSeenNumber(@Query('userId') user_id: string){
+    return this.userService.getShortsSeenNumber(user_id);
+  }
+
+  @Get('/timer')
+  getPlanTimer(@Query('userId') user_id:string){
+    return this.userService.getPlanTimer(user_id)
   }
 }
