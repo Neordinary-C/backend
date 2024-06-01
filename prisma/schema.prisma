@@ -27,6 +27,7 @@ model UserShorts {
   user_count       Int
   watched_count    Int
   created_at       DateTime           @default(now())
+  categories       Json
   SelectedCategory SelectedCategory[]
   User             User               @relation(fields: [user_id], references: [id])
 

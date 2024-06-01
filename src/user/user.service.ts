@@ -63,12 +63,15 @@ export class UserService {
       where: {
         user_id: +userId,
         status: status,
-        end_time: {
-          lt: threeMonthsAgo
         }
       }
-    });
-    const successDays = userTimers.map(timer => timer.end_time);
+    );
+    console.log(userTimers);
+    const successDays = userTimers
+    .filter((u) => u.start_time >= threeMonthsAgo)
+    .map(timer => timer.start_time);
+
+    console.log(successDays)
     return {
       "success": "ok",
       "days": successDays
@@ -79,13 +82,12 @@ export class UserService {
     const user = await this.databaseService.userStat.findFirst({
       where: { user_id: +userId }
     });
-    
     return {
       "success": "ok",
-      "user_score": user.total_score,
-      "user_shortscount": user.total_count,
-      "user_total_time_h": user.total_timer_h,
-      "user_total_time_m": user.total_timer_m
+      "user_score": user.total_score.toString(),
+      "user_shortscount": user.total_count.toString(),
+      "user_total_time_h": user.total_timer_h.toString(),
+      "user_total_time_m": user.total_timer_m.toString()
   };
   }
   
