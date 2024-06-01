@@ -3,6 +3,9 @@ import { DatabaseService } from 'src/database/database.service';
 import { CreateUserDto } from './dto/create-user.dto';
 import { NewTimerAndShortsDto } from './dto/new-timer-and-shorts.dto';
 import axios from 'axios';
+import { UpdateStatusDto } from './dto/update-status.dto';
+import { UpdateNumberDto } from './dto/update-number.dto';
+import { StartTimerDto } from './dto/user-timer.dto';
 
 @Injectable()
 export class UserService {
@@ -179,7 +182,7 @@ export class UserService {
                   response.data?.items?.map((item) => item?.id),
               );
 
-              if (index == entry) {
+              if (index - 1 == entry) {
                 resolve(responses?.flat());
               }
             })
@@ -195,5 +198,162 @@ export class UserService {
       success: 'ok',
       data: await getAllShorts,
     };
+  }
+
+  async getUserTimerStatus(userId) {
+    const users = await this.databaseService.userTimer.findMany({
+      where: { user_id: +userId },
+    });
+    const user = users.pop();
+    return {
+      success: 'ok',
+      status: user.status,
+    };
+  }
+
+  async getUserTimerTimes(userId) {
+    const users = await this.databaseService.userTimer.findMany({
+      where: { user_id: +userId },
+    });
+    const user = users.pop();
+    return {
+      success: 'ok',
+      start_time: user.start_time,
+      timer_hour: user.timer_h,
+      timer_minuate: user.timer_m,
+    };
+  }
+
+  async getSuccessDays(userId, status) {
+    const threeMonthsAgo = new Date();
+    threeMonthsAgo.setMonth(threeMonthsAgo.getMonth() - 3);
+
+    const userTimers = await this.databaseService.userTimer.findMany({
+      where: {
+        user_id: +userId,
+        status: status,
+      },
+    });
+    console.log(userTimers);
+    const successDays = userTimers
+      .filter((u) => u.start_time >= threeMonthsAgo)
+      .map((timer) => timer.start_time);
+
+    console.log(successDays);
+    return {
+      success: 'ok',
+      days: successDays,
+    };
+  }
+
+  async getMypage(userId) {
+    const user = await this.databaseService.userStat.findFirst({
+      where: { user_id: +userId },
+    });
+    return {
+      success: 'ok',
+      user_score: user.total_score.toString(),
+      user_shortscount: user.total_count.toString(),
+      user_total_time_h: user.total_timer_h.toString(),
+      user_total_time_m: user.total_timer_m.toString(),
+    };
+  }
+
+  async updateTimerStatus(UpdateStatusDto: UpdateStatusDto) {
+    console.log(UpdateStatusDto);
+    const users = await this.databaseService.userTimer.findMany({
+      where: {
+        user_id: +UpdateStatusDto.user_id,
+      },
+    });
+    const user = users.pop();
+    console.log(user);
+
+    await this.databaseService.userTimer.updateMany({
+      where: {
+        user_id: +user.user_id,
+      },
+      data: {
+        status: UpdateStatusDto.status,
+      },
+    });
+  }
+
+  async getShortsSeenNumber(userId: string) {
+    const user = await this.databaseService.user.findFirst({
+      where: {
+        user_id: userId,
+      },
+    });
+    const userShorts = await this.databaseService.userShorts.findFirst({
+      where: {
+        user_id: user.id,
+      },
+    });
+    return {
+      success: 'ok',
+      number: userShorts.watched_count ? userShorts.watched_count : 0,
+    };
+  }
+
+  async getPlanTimer(userId: string) {
+    const user = await this.databaseService.user.findFirst({
+      where: {
+        user_id: userId,
+      },
+    });
+    const user_timer = await this.databaseService.userTimer.findFirst({
+      where: {
+        user_id: user.id,
+      },
+    });
+    return {
+      success: 'ok',
+      time_h: user_timer ? user_timer.timer_h : 0,
+      time_m: user_timer ? user_timer.timer_m : 0,
+    };
+  }
+  async startTime(startTimeDto: StartTimerDto) {
+    const user = await this.databaseService.user.findFirst({
+      where: {
+        user_id: startTimeDto.user_id,
+      },
+    });
+    const user_timer = await this.databaseService.userTimer.findFirst({
+      where: {
+        user_id: user.id,
+      },
+    });
+    await this.databaseService.userTimer.create({
+      data: {
+        start_time: user_timer.start_time,
+      },
+    });
+
+    return {
+      success: 'ok',
+    };
+  }
+
+  async updateSeenNumber(updateNumberDto: UpdateNumberDto) {
+    const user = await this.databaseService.user.findFirst({
+      where: {
+        user_id: updateNumberDto.user_id,
+      },
+    });
+    const user_shorts = await this.databaseService.userShorts.findMany({
+      where: {
+        user_id: user.id,
+      },
+    });
+    await this.databaseService.userShorts.updateMany({
+      where: {
+        user_id: user.id,
+        created_at: user_shorts.pop().created_at,
+      },
+      data: {
+        watched_count: updateNumberDto.watched_count,
+      },
+    });
   }
 }
