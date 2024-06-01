@@ -12,10 +12,11 @@ async function bootstrap() {
 
   /* Swagger */
   const config = new DocumentBuilder()
-    .setTitle('UMC 6th Hackathon Team C - Swagger API 문서')
-    .setDescription('Swagger 문서 페이지입니다.')
+    .setTitle('6th Ne(o)rdinary Hackathon - Team C')
+    .setDescription('Swagger API 문서 페이지입니다.')
     .setVersion('1.0')
     .build();
+
   const document = SwaggerModule.createDocument(app, config);
   SwaggerModule.setup('swagger', app, document);
 
