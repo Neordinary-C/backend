@@ -12,6 +12,7 @@ import { UserService } from './user.service';
 import { UpdateUserDto } from './dto/update-user.dto';
 import { ApiOperation, ApiTags } from '@nestjs/swagger';
 import { Prisma } from '@prisma/client';
+import { UpdateStatusDto } from './dto/update-status.dto';
 
 @ApiTags('users')
 @Controller('users') // localhost:3000/api/users
@@ -72,4 +73,13 @@ export class UserController {
   ) {
     return this.userService.getSuccessDays(user_id, status);
   }
+
+  @ApiOperation({ summary: 'Change timer status' })
+  @Patch('/timer/status')
+    UpdateTimerStatus(@Body() UpdateStatusDto: UpdateStatusDto
+  ) {
+    return this.userService.updateTimerStatus(UpdateStatusDto);
+  }
+
+
 }

@@ -2,6 +2,7 @@ import { Injectable } from '@nestjs/common';
 import { UpdateUserDto } from './dto/update-user.dto';
 import { DatabaseService } from 'src/database/database.service';
 import { Prisma } from '@prisma/client';
+import { UpdateStatusDto } from './dto/update-status.dto';
 
 @Injectable()
 export class UserService {
@@ -90,5 +91,24 @@ export class UserService {
       "user_total_time_m": user.total_timer_m.toString()
   };
   }
-  
-}
+
+  async updateTimerStatus(UpdateStatusDto: UpdateStatusDto) {
+    console.log(UpdateStatusDto)
+    const users = await this.databaseService.userTimer.findMany({
+      where: {
+        user_id: +UpdateStatusDto.user_id
+      }
+    });
+    const user = users.pop()
+    console.log(user)
+
+    await this.databaseService.userTimer.updateMany(
+      {
+        where: {
+          user_id: +user.user_id
+        },
+        data: {
+          status: UpdateStatusDto.status
+      }
+  });
+}}
