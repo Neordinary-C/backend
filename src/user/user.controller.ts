@@ -40,6 +40,31 @@ export class UserController {
     return this.userService.remove(+id);
   }
 
+  @ApiOperation({ summary: 'Get user timer status' })
+  @Get('/timer/status')
+  getUserTimerStatus(
+    @Query('userId') user_id: string
+  ) {
+    return this.userService.getUserTimerStatus(user_id);
+  }
+
+  @ApiOperation({ summary: 'Get user timer set times' })
+  @Get('/timer/time')
+  getUserTimerTimes(
+    @Query('userId') user_id: string
+  ) {
+    return this.userService.getUserTimerTimes(user_id);
+  }
+
+  @ApiOperation({ summary: 'Get mypage datas' })
+  @Get('/my')
+  getMypage(
+    @Query('userId') user_id: string
+  ) {
+    return this.userService.getMypage(user_id);
+  }
+
+  @ApiOperation({ summary: 'Get success days' })
   @Get('/timer')
   getSuccessDays(
     @Query('userId') user_id: string,
